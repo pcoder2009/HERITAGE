@@ -4,18 +4,24 @@ dotenv.config({ path: './.env' });
 const express = require("express");
 const app = express();
 const path = require('path');
+const nanoid = require('nanoid')
 const stripe = require('stripe')(process.env.stripe_Secret_Key);
-
+//const bookingcall = require('./booking');
+let nid = nanoid.nanoid()
 exports.payment= (req, res) =>{ 
-
-  stripe.customers.create({ 
-      email: req.body.stripeEmail, 
-      source: req.body.stripeToken, 
-      name: 'Gautam', 
+    const{email, amount, stripeToken}=req.body
+    // const id = req.tokenObject.id
+    // console.log(id)
+    
+    stripe.customers.create({ 
+      email: email,
+      token: stripeToken, 
+    //   source: req.body.stripeToken, 
+      name: "TRIPTI", 
       address: { 
           line1: 'TC 9/4', 
           postal_code: '110', 
-          city: 'Delhi', 
+          city: 'BHILAI', 
           state: 'Delhi', 
           country: 'India', 
       } 
@@ -23,15 +29,19 @@ exports.payment= (req, res) =>{
   .then((customer) => { 
 
       return stripe.charges.create({ 
-          amount: 100,  
-          description: 'Web Development Product', 
-          currency: 'INR', 
-          customer: customer.id 
-      }); 
-  }) 
+          amount: amount*100,  
+          description: 'Development Product', 
+          currency: 'usd', 
+          customer: customer.id ,
+          receipt_email: email
+      },{nid}); 
+    }) 
   .then((charge) => { 
-      res.send("Success") // If no error occurs 
-  }) 
+      console.log("amount", amount);
+      console.log("nanoid:", nid);
+      res.status(200).send("Success") // If no error occurs 
+      //bookingcall.roomBook(id,room_id, start_date, end_date, start_time, end_time, no_of_rooms);
+    }) 
   .catch((err) => { 
       res.send(err)    // If some error occurs 
   }); 

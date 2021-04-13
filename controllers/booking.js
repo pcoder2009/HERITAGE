@@ -213,3 +213,70 @@ exports.roomBook = async (req, res) => {
   }
 }
 
+//booking cancel 
+exports.bookingCancel = async (req, res) =>{
+  const{booking_id}=req.body;
+  console.log("Request Recieved for : ",req.body);
+
+  if (booking_id) {
+    db.getConnection((err, con) => {
+      if (err) {
+        return res.sendStatus(500);
+      } else {
+        con.beginTransaction((err) => {
+          if (err) {
+            con.release();
+            //error
+            res.sendStatus(500)
+          } else {
+            //==========================================
+            con.query('SELECT * FROM bookings where status ="booked" && id=?', [booking_id], async (error, result1) => {
+              if (error) {
+                con.rollback();
+                con.release();
+                console.log(error);
+                return res.status(500).send({
+                  message: "INTERNAL SERVER ERROR"
+                });
+              } else {
+                if(result1.length > 0){
+                  con.query('UPDATE bookings SET status ="cancel" where ? ', [{ id: booking_id }], async (error, results2) => {
+                    if (error) {
+                      con.rollback();
+                      con.release();
+                      console.log(error);
+                      return res.status(500).send({
+                        message: "INTERNAL SERVER ERROR"
+                      });
+                    } else {
+                      con.commit();
+                      con.release();
+                      console.log(results2);
+                      return res.send({
+                        message: 'booking cancelled'
+                      });
+                    }
+                  });
+                }else{
+                  con.rollback();
+                  con.release();
+                  console.log(results);
+                  return res.send({
+                    message: 'no data found',
+                  });
+                }
+                
+              }
+            });
+            //========================================================
+          }
+        })
+      }
+    })
+  } else {
+    console.log("error");
+    return res.status(400).send({
+      error: "please provide valid details"
+    });
+  }
+}

@@ -21,9 +21,9 @@ router.post('/reset/password', validateToken, adminController.resetPassword);
 
 router.put('/email/change', validateToken, adminController.adminEmailChange);
 
-router.post('/create/room', validateToken, adminController.loadImageToBuffer.array('media'), adminController.createRoom);
+router.post('/create/room', validateToken, adminController.loadImageToBuffer.single('media'), adminController.createRoom);
 
-router.put('/update/room', validateToken,adminController.loadImageToBuffer.array('media'), adminController.roomupdate);
+router.put('/update/room', validateToken,adminController.loadImageToBuffer.single('media'), adminController.roomupdate);
 
 router.get('/list/room',  adminController.listRoom);
 

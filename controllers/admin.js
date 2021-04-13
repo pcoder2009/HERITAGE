@@ -860,54 +860,42 @@ exports.createRoom = async (req, res) => {
           } else {
             //==========================================
             var d = new Date();
-            console.log(req.files)
+            console.log(req.file)
 
-
-            var responseData = [];
-            await req.files.map(async (item) => {
-              var params = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: d.toString() + item.originalname,
-                Body: item.buffer,
-                ACL: 'public-read'
+            const params = {
+              Bucket: process.env.AWS_BUCKET_NAME,
+              Key: Date.now() + req.file.originalname,
+              Body: req.file.buffer,
+              ACL: 'public-read'
+            }
+            s3.upload(params, (error, data) => {
+              console.log(error, data)
+              if (error) {
+                con.rollback();
+                con.release();
+                return res.status(500).send(error);
               }
-              console.log(params);
-              await s3.upload(params, (error, data) => {
-                console.log(error, data)
+
+              con.query('INSERT INTO room SET ?', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms, rooms_left: no_of_rooms }], async (error, results) => {
                 if (error) {
                   con.rollback();
                   con.release();
-                  return res.status(500).send(error);
+                  console.log(error);
+                  return res.status(500).send({
+                    message: "INTERNAL SERVER ERROR"
+                  });
                 } else {
-                  responseData.push(data.Location);
-                  if (req.files.length == responseData.length) {
-
-                    con.query('INSERT INTO room SET ?', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: JSON.stringify(responseData), no_of_person: no_of_person, no_of_rooms: no_of_rooms, rooms_left: no_of_rooms }], async (error, results) => {
-                      if (error) {
-                        con.rollback();
-                        con.release();
-                        console.log(error);
-                        return res.status(500).send({
-                          message: "INTERNAL SERVER ERROR"
-                        });
-                      } else {
-                        con.commit();
-                        con.release();
-                        console.log(results);
-                        return res.send({
-                          message: 'room created'
-                        })
-                      }
-
-                    });
-                  }
-
+                  con.commit();
+                  con.release();
+                  console.log(results);
+                  return res.send({
+                    message: 'room created'
+                  })
                 }
 
-
               });
-            });
 
+            });
             //========================================================
           }
         })
@@ -925,7 +913,7 @@ exports.createRoom = async (req, res) => {
 exports.roomupdate = async (req, res) => {
   console.log("Request Recieved for : ", req.body);
 
-  const { room_id, room_name, description, amount, amenities, no_of_person, no_of_rooms} = req.body;
+  const { room_id, room_name, description, amount, amenities, no_of_person, no_of_rooms } = req.body;
 
   const id = req.tokenObject.id
   console.log(id)
@@ -955,67 +943,56 @@ exports.roomupdate = async (req, res) => {
 
                 if (results1.length > 0) {
                   var d = new Date();
-                  console.log(req.files)
+                  console.log(req.file)
 
 
-                  var responseData = [];
-                  await req.files.map(async (item) => {
-                    var params = {
-                      Bucket: process.env.AWS_BUCKET_NAME,
-                      Key: d.toString() + item.originalname,
-                      Body: item.buffer,
-                      ACL: 'public-read'
+                  const params = {
+                    Bucket: process.env.AWS_BUCKET_NAME,
+                    Key: Date.now() + req.file.originalname,
+                    Body: req.file.buffer,
+                    ACL: 'public-read'
+                  }
+                  s3.upload(params, (error, data) => {
+                    console.log(error, data)
+                    if (error) {
+                      con.rollback();
+                      con.release();
+                      return res.status(500).send(error);
                     }
-                    console.log(params);
-                    await s3.upload(params, (error, data) => {
-                      console.log(error, data)
+
+                    con.query('UPDATE room SET ? where ? && status ="active"', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms }, { id: room_id }], async (error, results) => {
                       if (error) {
                         con.rollback();
                         con.release();
-                        return res.status(500).send(error);
+                        console.log(error);
+                        return res.status(500).send({
+                          message: "INTERNAL SERVER ERROR"
+                        });
                       } else {
-                        responseData.push(data.Location);
-                        if (req.files.length == responseData.length) {
-
-                          con.query('UPDATE room SET ? where ? && status ="active"', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: JSON.stringify(responseData), no_of_person: no_of_person, no_of_rooms: no_of_rooms }, { id: room_id }], async (error, results) => {
-                            if (error) {
-                              con.rollback();
-                              con.release();
-                              console.log(error);
-                              return res.status(500).send({
-                                message: "INTERNAL SERVER ERROR"
-                              });
-                            } else {
-                              con.query('SELECT * FROM room where ? AND status ="active"', [{ id: room_id }], async (error, results2) => {
-                                if (error) {
-                                  con.rollback();
-                                  con.release();
-                                  console.log(error);
-                                  return res.status(500).send({
-                                    message: "INTERNAL SERVER ERROR"
-                                  });
-                                } else {
-                                  con.commit();
-                                  con.release();
-                                  console.log(results);
-                                  console.log(results2);
-                                  return res.send({
-                                    ...results1,
-                                    message: 'UPDATED SUCCESSFULLY',
-                                    results2
-                                  });
-                                }
-                              });
-                            }
-                          });
-                        }
-
+                        con.query('SELECT * FROM room where ? AND status ="active"', [{ id: room_id }], async (error, results2) => {
+                          if (error) {
+                            con.rollback();
+                            con.release();
+                            console.log(error);
+                            return res.status(500).send({
+                              message: "INTERNAL SERVER ERROR"
+                            });
+                          } else {
+                            con.commit();
+                            con.release();
+                            console.log(results);
+                            console.log(results2);
+                            return res.send({
+                              ...results1,
+                              message: 'UPDATED SUCCESSFULLY',
+                              results2
+                            });
+                          }
+                        });
                       }
-
-
                     });
-                  });
 
+                  });
 
 
                 } else {

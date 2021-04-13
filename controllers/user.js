@@ -890,3 +890,53 @@ exports.userlistId = async (req, res) => {
   }
 
 }
+
+
+//list of booking done by user
+exports.bookingListUser = async (req, res) =>{
+  // const{user_id}=req.body;
+  const id = req.tokenObject.id
+  console.log(id);
+
+  if (id) {
+    db.getConnection((err, con) => {
+      if (err) {
+        return res.sendStatus(500);
+      } else {
+        con.beginTransaction((err) => {
+          if (err) {
+            con.release();
+            //error
+            res.sendStatus(500)
+          } else {
+            //==========================================
+            con.query('SELECT b.id as booking_id, b.room_id, b.user_id, b.start_date, b.end_date, b.start_time, b.end_time, b.status, b.no_of_rooms FROM bookings b, user u where (b.user_id=u.id AND u.id=? AND b.user_id=?) AND u.status ="active" AND b.status="booked"', [id,id], async (error, results) => {
+              if (error) {
+                con.rollback();
+                con.release();
+                console.log(error);
+                return res.status(500).send({
+                  message: "INTERNAL SERVER ERROR"
+                });
+              } else {
+                con.commit();
+                con.release();
+                console.log(results);
+                return res.send({
+                  message: 'user booking list',
+                  data: results
+                });
+              }
+            });
+            //========================================================
+          }
+        })
+      }
+    })
+  } else {
+    console.log("error");
+    return res.status(400).send({
+      error: "please provide valid details"
+    });
+  }
+}

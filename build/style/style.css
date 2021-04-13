@@ -1,0 +1,273 @@
+.body {
+  background-color: #e1e1e1 !important;
+}
+li{
+  list-style: none !important;
+}
+.img-sizer{
+  height: 400px !important;
+  width: auto;
+
+}
+
+.tdrd:hover{
+  color: black;
+}
+
+tr:hover{
+  color: rgb(255, 160, 16);
+  cursor: pointer;
+}
+
+.img-fluid{
+  height: 22px !important;
+}
+
+.carousel-control-prev{
+  transform: rotateY(180deg);
+}
+/* .carousel-control-prev-icon{
+  background-image: url(https://img.icons8.com/carbon-copy/100/000000/arrow.png) !important;
+} */
+
+
+
+.lil:before {
+  content: '✓   ' !important;
+}
+.lil{
+  padding: 5px;
+
+}
+
+.banner {
+  width: 100%;
+  height: 40px;
+}
+
+.right-menu {
+  float: right;
+  position: relative;
+  width: 50%;
+}
+
+.right-submenu {
+  clear: both;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  text-align: right;
+  margin-top: 8px;
+}
+span {
+  font-size: 16px;
+}
+
+.subherder {
+  margin-top: -10px !important;
+  font-size: 12px;
+}
+a {
+  font-weight: 700;
+}
+.text-main: {
+  font-size: 18px;
+  height: 100%;
+}
+.text-main:hover {
+  background-color: rgb(173, 110, 28);
+}
+
+.card-box {
+  background: #ffffff;
+  -webkit-box-shadow: 0 5px 10px 3px rgb(36 44 74 / 10%);
+  box-shadow: 0 5px 10px 3px rgb(36 44 74 / 10%);
+  padding: 10px;
+}
+.rating {
+  color: #003580;
+  font-family: "Hind";
+  font-weight: bold;
+  padding-right: 20px;
+  text-transform: uppercase;
+  font-size: 30px;
+}
+
+.main-body {
+  color: #333;
+  border: 1px solid #e3e3dd;
+  padding: 5px;
+  float: left;
+  width: 100%;
+  background: #f2f2f2;
+}
+
+.carousel-inner img {
+  width: 100%;
+  height: 100%;
+}
+
+#custCarousel .carousel-indicators {
+  position: static;
+  /* margin-top: 20px; */
+}
+
+#custCarousel .carousel-indicators > li {
+  width: 100px;
+}
+
+#custCarousel .carousel-indicators li img {
+  display: block;
+  opacity: 0.5;
+}
+
+#custCarousel .carousel-indicators li.active img {
+  opacity: 1;
+}
+
+#custCarousel .carousel-indicators li:hover img {
+  opacity: 0.75;
+}
+
+.carousel-item img {
+  /* width: auto; */
+  width: 70%
+}
+.carousel-control-next,
+.carousel-control-prev {
+  color: black !important;
+}
+
+.heading {
+  font-size: 28px;
+}
+
+.img-icon {
+  height: 40px;
+}
+
+.detail_text {
+  font-weight: 400;
+  font-size: 15px;
+}
+li {
+  position: relative;
+}
+.tdr {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+
+.heading_sub {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.grey-back {
+  background-color: rgb(239 239 239);
+  border-radius: 10px;
+}
+.blue-back {
+  background-color: #003580;
+  height: 100px;
+  margin-top: 20px;
+}
+a {
+  text-decoration: none !important;
+  color: black !important;
+}
+.mobile-v {
+  display: flex !important;
+}
+.fonts {
+  font-size: 20px i !important;
+}
+.img-m {
+  width: 100px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  -webkit-transform: translate(-50%);
+}
+.c-pa{
+    padding: 5px;
+}
+
+
+
+/* hovers */
+.nav-item:hover{
+    background-color: rgb(79, 132, 211);
+    text-decoration: underline;
+    text-decoration-color: #333;
+}
+.main-body:hover{
+    box-shadow: 5px 5px 5px rgb(182, 179, 179);
+}
+.card-box:hover{
+    box-shadow:  0 5px 10px 10px rgb(211, 211, 211);
+}
+
+
+@media only screen and (max-width: 991px) {
+  li {
+    font-size: 10px;
+  }
+  .img-icon {
+    height: 20px;
+  }
+  .blue-back {
+    height: auto;
+  }
+  .mobile-v {
+    display: inherit !important;
+  }
+  iframe {
+    height: auto;
+    width: 100%;
+  }
+  .right-menu {
+    width: auto;
+  }
+  .img-m {
+    width: 80px;
+    position: relative;
+    left: auto;
+  }
+  .c-pa{
+      padding: 0;
+  }
+  
+}
+
+@media only screen and (max-width:1024px){
+    li {
+        font-size: 10px;
+      }
+      .img-icon {
+        height: 20px;
+      }
+      .blue-back {
+        height: auto;
+      }
+      .mobile-v {
+        display: inherit !important;
+      }
+      iframe {
+        width: 100%;
+      }
+      .right-menu {
+        width: auto;
+      }
+      .img-m {
+        width: 80px;
+        position: absolute;
+    left: 50%;
+      }
+      .c-pa{
+          padding: 0;
+      }
+}

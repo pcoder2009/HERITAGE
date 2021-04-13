@@ -23,4 +23,6 @@ router.put('/email/change', validateToken, userController.userEmailChange);
 
 router.get('/list/id', validateToken, userController.userlistId);
 
+router.get('/booking/list', validateToken, userController.bookingListUser);
+
 module.exports =router;
