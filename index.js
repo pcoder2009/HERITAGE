@@ -40,6 +40,7 @@ app.use('/admin',require('./routes/admin_routes'));
 app.use('/search',require('./routes/search_routes'));
 app.use('/booking',require('./routes/booking_routes'));
 app.use('/gateway',require('./routes/payment_routes'));
+app.use('/site',require('./routes/site_route'));
 
 // app.use('/payment',require('./routes/payment_routes'));
 // app.use('/location',require('./routes/car_location_routes'));
