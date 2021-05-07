@@ -445,7 +445,7 @@ exports.forgot = async (req, res) => {
                       });
                     } else {
 
-                      let link = req.protocol + "://" + req.get('host') + "/verify" + token + "/" + nid;
+                      let link = req.protocol + "://" + req.get('host') + "/verify/" + token + "/" + nid;
                       let transporter = nodemailer.createTransport({
 
                         service: "gmail",
@@ -507,6 +507,7 @@ exports.forgot = async (req, res) => {
 exports.forgotPassVerify = async (req, res) => {
   const { token, master_password, new_password, confirm_password } = req.body;
 
+  console.log("request received for: ",req.body);
   if (token == null) {
     res.sendStatus(401)
     res.end();

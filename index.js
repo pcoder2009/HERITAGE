@@ -42,11 +42,6 @@ app.use('/booking',require('./routes/booking_routes'));
 app.use('/gateway',require('./routes/payment_routes'));
 app.use('/site',require('./routes/site_route'));
 
-// app.use('/payment',require('./routes/payment_routes'));
-// app.use('/location',require('./routes/car_location_routes'));
-// app.use('/blog',require('./routes/blog_routes'));
-// app.use('/FAQ',require('./routes/faq_routes'));
-
 // app.get('/', function(req, res){ 
 //     res.render('pay', { 
 //     key: process.env.stripe_Publishable_Key 

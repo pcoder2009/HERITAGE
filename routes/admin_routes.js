@@ -33,4 +33,6 @@ router.get('/list/user',  adminController.listUser);
 
 router.get('/list/user/id',  adminController.listUserId);
 
+router.get('/bookList',  adminController.bookingList);
+
 module.exports =router;

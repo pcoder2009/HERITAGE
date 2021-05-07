@@ -527,7 +527,7 @@ exports.forgot = async (req, res) => {
                       });
                     } else {
 
-                      let link = req.protocol + "://" + req.get('host') + "/verify" + token + "/" + nid;
+                      let link = req.protocol + "://" + req.get('host') + "/verify/" + token + "/" + nid;
                       let transporter = nodemailer.createTransport({
 
                         service: "gmail",
@@ -841,13 +841,16 @@ exports.resetPassword = async (req, res) => {
 
 //room creation api
 exports.createRoom = async (req, res) => {
-  const { room_name, description, amount, amenities, no_of_person, no_of_rooms } = req.body;
+  const { room_name, description, amount, amenities, no_of_person, no_of_rooms, discount } = req.body;
   console.log("Request Recieved for : ", req.body);
 
   const id = req.tokenObject.id
   console.log(id)
 
-  if (room_name && description && amount && amenities && no_of_person && no_of_rooms) {
+  console.log("media : ",req.file)
+
+
+  if (room_name && description && amount && amenities && no_of_person && no_of_rooms && discount) {
     db.getConnection(async (err, con) => {
       if (err) {
         return res.sendStatus(500);
@@ -873,10 +876,11 @@ exports.createRoom = async (req, res) => {
               if (error) {
                 con.rollback();
                 con.release();
+                console.log("s3 error");
                 return res.status(500).send(error);
               }
 
-              con.query('INSERT INTO room SET ?', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms, rooms_left: no_of_rooms }], async (error, results) => {
+              con.query('INSERT INTO room SET ?', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms, rooms_left: no_of_rooms, discount: discount }], async (error, results) => {
                 if (error) {
                   con.rollback();
                   con.release();
@@ -913,7 +917,7 @@ exports.createRoom = async (req, res) => {
 exports.roomupdate = async (req, res) => {
   console.log("Request Recieved for : ", req.body);
 
-  const { room_id, room_name, description, amount, amenities, no_of_person, no_of_rooms } = req.body;
+  const { room_id, room_name, description, amount, amenities, no_of_person, no_of_rooms, discount } = req.body;
 
   const id = req.tokenObject.id
   console.log(id)
@@ -960,7 +964,7 @@ exports.roomupdate = async (req, res) => {
                       return res.status(500).send(error);
                     }
 
-                    con.query('UPDATE room SET ? where ? && status ="active"', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms }, { id: room_id }], async (error, results) => {
+                    con.query('UPDATE room SET ? where ? && status ="active"', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms, discount: discount }, { id: room_id }], async (error, results) => {
                       if (error) {
                         con.rollback();
                         con.release();
@@ -1191,6 +1195,47 @@ exports.listUserId = async (req, res) => {
               console.log(results);
               return res.send({
                 message: 'room list',
+                data: results
+              });
+            }
+          });
+          //========================================================
+        }
+      })
+    }
+  })
+}
+
+//booking list for admin
+exports.bookingList = async (req, res) =>{
+  
+  db.getConnection((err, con) => {
+    if (err) {
+      return res.sendStatus(500);
+    } else {
+      con.beginTransaction((err) => {
+        if (err) {
+          con.release();
+          //error
+          res.sendStatus(500)
+        } else {
+
+
+          //==========================================
+          con.query('SELECT bs.*,u.name,r.room_name FROM HERITAGE.bookings bs inner join HERITAGE.user u on u.id=bs.user_id inner join HERITAGE.room r on bs.room_id=r.id;',async (error, results) => {
+            if (error) {
+              con.rollback();
+              con.release();
+              console.log(error);
+              return res.status(500).send({
+                message: "INTERNAL SERVER ERROR"
+              });
+            } else {
+              con.commit();
+              con.release();
+              console.log(results);
+              return res.send({
+                message: 'booking list',
                 data: results
               });
             }
