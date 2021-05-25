@@ -46,7 +46,7 @@ exports.userregistration = (req, res) => {
               if (results.length > 0) {
                 con.rollback();
                 con.release();
-                return res.send({
+                return res.status(402).send({
                   message: 'email is alreay registered'
                 })
               }
@@ -450,13 +450,13 @@ exports.forgot = async (req, res) => {
 
                         service: "gmail",
                         auth: {
-                          user: "pcoder.test.innovate@gmail.com", //new mail
-                          pass: "Pcoder123",
+                          user: "firstheritageinn.official@gmail.com", //new mail
+                          pass: "First@123",
                         },
                       });
                       //html : "Hello,<br> Please Click on the link to verify your email.<br><a href="+link+">Click here to verify</a>"
                       var mailOptions = {
-                        from: "pcoder.test.innovate@gmail.com",
+                        from: "firstheritageinn.official@gmail.com",
                         to: email,     //admin mail
                         subject: "request for password reset",
                         html: "Hello, " + name + "<br> please click on the following link <a href=" + link + ">click here</a> to reset your password.<br> If you did not request this, please ignore this email and your password will remain unchanged."
@@ -575,16 +575,16 @@ exports.forgotPassVerify = async (req, res) => {
 
                           service: "gmail",
                           auth: {
-                            user: "pcoder.test.innovate@gmail.com", //new mail
-                            pass: "Pcoder123",
+                            user: "firstheritageinn.official@gmail.com", //new mail
+                            pass: "First@123",
                           },
                         });
 
                         var mailOptions = {
-                          from: "pcoder.test.innovate@gmail.com",
+                          from: "firstheritageinn.official@gmail.com",
                           to: email,     //admin mail
                           subject: "Your password has been changed",
-                          html: "Hello<br>This is a confirmation mail that the password for your ZOOM CAR account with email" + email + "has been changed.",
+                          html: "Hello<br>This is a confirmation mail that the password for your HERITAGE account with email" + email + "has been changed.",
 
                         };
 
@@ -695,16 +695,16 @@ exports.resetPassword = async (req, res) => {
 
                         service: "gmail",
                         auth: {
-                          user: "pcoder.test.innovate@gmail.com", //new mail
-                          pass: "Pcoder123",
+                          user: "firstheritageinn.official@gmail.com", //new mail
+                          pass: "First@123",
                         },
                       });
 
                       var mailOptions = {
-                        from: "pcoder.test.innovate@gmail.com",
+                        from: "firstheritageinn.official@gmail.com",
                         to: email,     //admin mail
                         subject: "Your password has been changed",
-                        html: "Hello, <br>This is a confirmation mail that the password for your ZOOM CAR account with login id " + email + "has been changed.",
+                        html: "Hello, <br>This is a confirmation mail that the password for your HERITAGE account with login id " + email + "has been changed.",
                       };
 
                       transporter.sendMail(mailOptions, function (error, info) {

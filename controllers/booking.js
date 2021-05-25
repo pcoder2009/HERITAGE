@@ -4,7 +4,8 @@ dotenv.config({ path: './.env' });
 const express = require("express");
 const app = express();
 const path = require('path');
-
+const nodemailer = require('nodemailer');
+const moment = require('moment');
 
 //room booking api
 exports.roomBook = async (req, res) => {
@@ -101,7 +102,7 @@ exports.roomBook = async (req, res) => {
                               console.log("results=>query3:  ", results);
 
                               //c_id=results[0].id;
-                              if ((results.length > 0) && results[0].rooms_left>no_of_rooms) {
+                              if ((results.length > 0) && results[0].rooms_left > no_of_rooms) {
                                 con.query('INSERT INTO bookings SET ? ', { room_id: room_id, start_date: start_date, end_date: end_date, start_time: start_time, end_time: end_time, user_id: id, no_of_rooms: no_of_rooms }, (error, results) => {
                                   if (error) {
                                     con.rollback();
@@ -152,14 +153,82 @@ exports.roomBook = async (req, res) => {
                                                       message: "INTERNAL SERVER ERROR"
                                                     });
                                                   } else {
-                                                    con.commit();
-                                                    con.release();
-                                                    console.log("result6 update romm_number=> ", results6);
-                                                    return res.send({
-                                                      message: 'booking successful',
-                                                      ...results3,
-                                                      results6
+                                                    
+                                                    let booking_id=results3[0].id;
+                                                    console.log("results3", booking_id)
+                                                    con.query('SELECT u.name, u.mobile, u.email, r.id as room_id, r.room_name, r.amount, r.amenities, r.no_of_person, b.id as booking_id, b.start_date, b.end_date, b.start_time, b.end_time FROM bookings b, room r, user u  where b.room_id=r.id AND b.user_id=u.id AND b.id=? ', [booking_id], (error, results7) => {
+                                                      if (error) {
+                                                        con.rollback();
+                                                        con.release();
+                                                        console.log(error);
+                                                        return res.status(500).send({
+                                                          message: "INTERNAL SERVER ERROR"
+                                                        });
+                                                      } else {
+                                                        console.log("results7=> ", results7);
+                                                        //no of days between two dates
+                                                        let count = moment(results7[0].end_date).diff(moment(results7[0].start_date), 'days');
+                                                        // console.log("count ",count)
+                                                        let check_in=moment(results7[0].start_date, "YYYY-MM-DD").format("DD-MM-YYYY");
+                                                        // console.log("check_in ",check_in)
+                                                        let check_out=moment(results7[0].end_date, "YYYY-MM-DD").format("DD-MM-YYYY");
+                                                        let transporter = nodemailer.createTransport({
+
+                                                          service: "gmail",
+                                                          auth: {
+                                                            user: "firstheritageinn.official@gmail.com", //new mail
+                                                            pass: "First@123",
+                                                          },
+                                                        });
+                                                        //html : "Hello,<br> Please Click on the link to verify your email.<br><a href="+link+">Click here to verify</a>"
+                                                        var mailOptions = {
+                                                          from: "firstheritageinn.official@gmail.com",
+                                                          to: ["motel.rantoul@gmail.com", results7[0].email],     //admin mail
+                                                          subject: "BOOKING CONFIRMATION",
+                                                          html: `<html lang="en">
+                                                            <h4>BOOKING DETAILS</h4>
+                                                            
+                                                            User Name : ${results7[0].name}<br>
+                                                            User Email : ${results7[0].email}<br>
+                                                            User Mobile : ${results7[0].mobile}<br>
+                                                            Room Id : ${results7[0].room_id}<br>
+                                                            Room Name : ${results7[0].room_name}<br>
+                                                            Room Amount : ${results7[0].amount}<br>
+                                                            No of Persons : ${results7[0].no_of_person}<br>
+                                                            Booking Id : ${results7[0].booking_id}<br>
+                                                            Check In : ${check_in}<br>
+                                                            Check Out : ${check_out}<br>
+                                                            Number of Days : ${count}
+                                                            
+                                                      </html>`
+
+                                                        };
+
+                                                        transporter.sendMail(mailOptions, function (error, info) {
+                                                          if (error) {
+                                                            con.rollback();
+                                                            con.release();
+                                                            console.log(error);
+                                                            return res.status(400).json(error);
+                                                          } else {
+                                                            con.commit();
+                                                            con.release();
+                                                            console.log("result6 update romm_number=> ", results6);
+                                                            
+                                                            
+                                                            res.status(200).json({
+                                                              message: 'booking successful',
+                                                              ...results3,
+                                                              results6
+                                                        
+                                                        
+                                                            });
+                                                          }
+                                                        });
+                                                        
+                                                      }
                                                     });
+
                                                   }
                                                 })
 
@@ -214,9 +283,9 @@ exports.roomBook = async (req, res) => {
 }
 
 //booking cancel 
-exports.bookingCancel = async (req, res) =>{
-  const{booking_id}=req.body;
-  console.log("Request Recieved for : ",req.body);
+exports.bookingCancel = async (req, res) => {
+  const { booking_id } = req.body;
+  console.log("Request Recieved for : ", req.body);
 
   if (booking_id) {
     db.getConnection((err, con) => {
@@ -239,7 +308,7 @@ exports.bookingCancel = async (req, res) =>{
                   message: "INTERNAL SERVER ERROR"
                 });
               } else {
-                if(result1.length > 0){
+                if (result1.length > 0) {
                   con.query('UPDATE bookings SET status ="cancel" where ? ', [{ id: booking_id }], async (error, results2) => {
                     if (error) {
                       con.rollback();
@@ -257,7 +326,7 @@ exports.bookingCancel = async (req, res) =>{
                       });
                     }
                   });
-                }else{
+                } else {
                   con.rollback();
                   con.release();
                   console.log(results);
@@ -265,7 +334,7 @@ exports.bookingCancel = async (req, res) =>{
                     message: 'no data found',
                   });
                 }
-                
+
               }
             });
             //========================================================

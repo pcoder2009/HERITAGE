@@ -23,7 +23,9 @@ router.put('/email/change', validateToken, adminController.adminEmailChange);
 
 router.post('/create/room', validateToken, adminController.loadImageToBuffer.single('media'), adminController.createRoom);
 
-router.put('/update/room', validateToken,adminController.loadImageToBuffer.single('media'), adminController.roomupdate);
+router.put('/update/room', validateToken, adminController.roomupdate);
+
+router.post("/delete/room",  adminController.deleteRoom)
 
 router.get('/list/room',  adminController.listRoom);
 

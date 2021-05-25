@@ -218,7 +218,7 @@ span {
 a {
   font-weight: 700;
 }
-.text-main: {
+.text-main {
   font-size: 18px;
   height: 100%;
 }
@@ -468,7 +468,7 @@ a {
     display: block;
   }
   .heading {
-    font-size: 20px;
+    font-size: 28px;
   }
   .carousel-item img {
     max-height: 200px;
@@ -611,4 +611,14 @@ a {
   .lil::before {
     margin-left: -15px;
   }
+}
+
+.img_bob{
+  height: 100px;
+  width: 120px;
+}
+
+.heading-master{
+  font-size: 20px;
+  font-weight: bold;
 }

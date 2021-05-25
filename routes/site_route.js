@@ -46,7 +46,7 @@ router.get("/get/contactUs",siteController.select_contactUs)
 
 router.post("/add/site_banner", siteController.loadImageToBuffer.array('image'), siteController.add_site_banner)
 
-router.put("/update/site_banner", siteController.loadImageToBuffer.array('image'), siteController.edit_site_banner)
+router.put("/update/site_banner", siteController.loadImageToBuffer.single('image'), siteController.edit_site_banner)
 
 router.get("/get/site_banner",siteController.select_site_banner)
 
