@@ -527,18 +527,18 @@ exports.forgot = async (req, res) => {
                       });
                     } else {
 
-                      let link = req.protocol + "://" + req.get('host') + "/verify" + token + "/" + nid;
+                      let link = req.protocol + "://" + req.get('host') + "/verify/" + token + "/" + nid;
                       let transporter = nodemailer.createTransport({
 
                         service: "gmail",
                         auth: {
-                          user: "pcoder.test.innovate@gmail.com", //new mail
-                          pass: "Pcoder123",
+                          user: "firstheritageinn.official@gmail.com", //new mail
+                          pass: "First@123",
                         },
                       });
                       //html : "Hello,<br> Please Click on the link to verify your email.<br><a href="+link+">Click here to verify</a>"
                       var mailOptions = {
-                        from: "pcoder.test.innovate@gmail.com",
+                        from: "firstheritageinn.official@gmail.com",
                         to: email,     //admin mail
                         subject: "request for password reset",
                         html: "Hello, " + name + "<br> please click on the following link <a href=" + link + ">click here</a> to reset your password.<br> If you did not request this, please ignore this email and your password will remain unchanged."
@@ -656,16 +656,16 @@ exports.forgotPassVerify = async (req, res) => {
 
                           service: "gmail",
                           auth: {
-                            user: "pcoder.test.innovate@gmail.com", //new mail
-                            pass: "Pcoder123",
+                            user: "firstheritageinn.official@gmail.com", //new mail
+                            pass: "First@123",
                           },
                         });
 
                         var mailOptions = {
-                          from: "pcoder.test.innovate@gmail.com",
+                          from: "firstheritageinn.official@gmail.com",
                           to: email,     //admin mail
                           subject: "Your password has been changed",
-                          html: "Hello<br>This is a confirmation mail that the password for your ZOOM CAR account with email" + email + "has been changed.",
+                          html: "Hello<br>This is a confirmation mail that the password for your HERITAGE account with email" + email + "has been changed.",
 
                         };
 
@@ -780,16 +780,16 @@ exports.resetPassword = async (req, res) => {
 
                         service: "gmail",
                         auth: {
-                          user: "pcoder.test.innovate@gmail.com", //new mail
-                          pass: "Pcoder123",
+                          user: "firstheritageinn.official@gmail.com", //new mail
+                          pass: "First@123",
                         },
                       });
 
                       var mailOptions = {
-                        from: "pcoder.test.innovate@gmail.com",
+                        from: "firstheritageinn.official@gmail.com",
                         to: email,     //admin mail
                         subject: "Your password has been changed",
-                        html: "Hello, <br>This is a confirmation mail that the password for your ZOOM CAR account with login id " + email + "has been changed.",
+                        html: "Hello, <br>This is a confirmation mail that the password for your HERITAGE account with login id " + email + "has been changed.",
 
                       };
 
@@ -841,13 +841,16 @@ exports.resetPassword = async (req, res) => {
 
 //room creation api
 exports.createRoom = async (req, res) => {
-  const { room_name, description, amount, amenities, no_of_person, no_of_rooms } = req.body;
+  const { room_name, description, amount, amenities, no_of_person, no_of_rooms, discount } = req.body;
   console.log("Request Recieved for : ", req.body);
 
   const id = req.tokenObject.id
   console.log(id)
 
-  if (room_name && description && amount && amenities && no_of_person && no_of_rooms) {
+  console.log("media : ",req.file)
+
+
+  if (room_name && description && amount && amenities && no_of_person && no_of_rooms && discount) {
     db.getConnection(async (err, con) => {
       if (err) {
         return res.sendStatus(500);
@@ -873,10 +876,11 @@ exports.createRoom = async (req, res) => {
               if (error) {
                 con.rollback();
                 con.release();
+                console.log("s3 error");
                 return res.status(500).send(error);
               }
 
-              con.query('INSERT INTO room SET ?', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms, rooms_left: no_of_rooms }], async (error, results) => {
+              con.query('INSERT INTO room SET ?', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms, rooms_left: no_of_rooms, discount: discount }], async (error, results) => {
                 if (error) {
                   con.rollback();
                   con.release();
@@ -913,7 +917,7 @@ exports.createRoom = async (req, res) => {
 exports.roomupdate = async (req, res) => {
   console.log("Request Recieved for : ", req.body);
 
-  const { room_id, room_name, description, amount, amenities, no_of_person, no_of_rooms } = req.body;
+  const { room_id,  amount,  no_of_rooms, discount } = req.body;
 
   const id = req.tokenObject.id
   console.log(id)
@@ -942,58 +946,38 @@ exports.roomupdate = async (req, res) => {
               } else {
 
                 if (results1.length > 0) {
-                  var d = new Date();
-                  console.log(req.file)
 
-
-                  const params = {
-                    Bucket: process.env.AWS_BUCKET_NAME,
-                    Key: Date.now() + req.file.originalname,
-                    Body: req.file.buffer,
-                    ACL: 'public-read'
-                  }
-                  s3.upload(params, (error, data) => {
-                    console.log(error, data)
+                  con.query('UPDATE room SET ? where ? && status ="active"', [{ amount: amount, no_of_rooms: no_of_rooms, discount: discount }, { id: room_id }], async (error, results) => {
                     if (error) {
                       con.rollback();
                       con.release();
-                      return res.status(500).send(error);
+                      console.log(error);
+                      return res.status(500).send({
+                        message: "INTERNAL SERVER ERROR"
+                      });
+                    } else {
+                      con.query('SELECT * FROM room where ? AND status ="active"', [{ id: room_id }], async (error, results2) => {
+                        if (error) {
+                          con.rollback();
+                          con.release();
+                          console.log(error);
+                          return res.status(500).send({
+                            message: "INTERNAL SERVER ERROR"
+                          });
+                        } else {
+                          con.commit();
+                          con.release();
+                          console.log(results);
+                          console.log(results2);
+                          return res.send({
+                            ...results1,
+                            message: 'UPDATED SUCCESSFULLY',
+                            results2
+                          });
+                        }
+                      });
                     }
-
-                    con.query('UPDATE room SET ? where ? && status ="active"', [{ room_name: room_name, description: description, amount: amount, amenities: amenities, media: data.Location, no_of_person: no_of_person, no_of_rooms: no_of_rooms }, { id: room_id }], async (error, results) => {
-                      if (error) {
-                        con.rollback();
-                        con.release();
-                        console.log(error);
-                        return res.status(500).send({
-                          message: "INTERNAL SERVER ERROR"
-                        });
-                      } else {
-                        con.query('SELECT * FROM room where ? AND status ="active"', [{ id: room_id }], async (error, results2) => {
-                          if (error) {
-                            con.rollback();
-                            con.release();
-                            console.log(error);
-                            return res.status(500).send({
-                              message: "INTERNAL SERVER ERROR"
-                            });
-                          } else {
-                            con.commit();
-                            con.release();
-                            console.log(results);
-                            console.log(results2);
-                            return res.send({
-                              ...results1,
-                              message: 'UPDATED SUCCESSFULLY',
-                              results2
-                            });
-                          }
-                        });
-                      }
-                    });
-
                   });
-
 
                 } else {
                   con.rollback();
@@ -1021,6 +1005,52 @@ exports.roomupdate = async (req, res) => {
   }
 
 }
+
+
+//delete room api
+exports.deleteRoom = async (req, res) =>{
+  const { id } = req.body;
+	console.log("Request received for: ", req.body);
+
+  db.getConnection((err, con) => {
+    if (err) {
+      return res.sendStatus(500);
+    } else {
+      con.beginTransaction((err) => {
+        if (err) {
+          con.release();
+          //error
+          res.sendStatus(500)
+        } else {
+
+
+          //==========================================
+          con.query('DELETE FROM room WHERE id=? ', [id], (error, results) => {
+            if (error) {
+              con.rollback();
+              con.release();
+              console.log(error);
+              return res.status(500).send({
+                message: "INTERNAL SERVER ERROR"
+              });
+            } else {
+              con.commit();
+              con.release();
+              console.log(results);
+              return res.send({
+                message: 'room deleted'
+              })
+            }
+          });
+          //========================================================
+        }
+      })
+    }
+  })
+}
+
+
+
 
 //list of room
 exports.listRoom = async (req, res) => {
@@ -1191,6 +1221,47 @@ exports.listUserId = async (req, res) => {
               console.log(results);
               return res.send({
                 message: 'room list',
+                data: results
+              });
+            }
+          });
+          //========================================================
+        }
+      })
+    }
+  })
+}
+
+//booking list for admin
+exports.bookingList = async (req, res) =>{
+  
+  db.getConnection((err, con) => {
+    if (err) {
+      return res.sendStatus(500);
+    } else {
+      con.beginTransaction((err) => {
+        if (err) {
+          con.release();
+          //error
+          res.sendStatus(500)
+        } else {
+
+
+          //==========================================
+          con.query('SELECT bs.*,u.name,r.room_name FROM HERITAGE.bookings bs inner join HERITAGE.user u on u.id=bs.user_id inner join HERITAGE.room r on bs.room_id=r.id ORDER BY bs.start_date DESC',async (error, results) => {
+            if (error) {
+              con.rollback();
+              con.release();
+              console.log(error);
+              return res.status(500).send({
+                message: "INTERNAL SERVER ERROR"
+              });
+            } else {
+              con.commit();
+              con.release();
+              console.log(results);
+              return res.send({
+                message: 'booking list',
                 data: results
               });
             }

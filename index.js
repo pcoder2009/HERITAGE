@@ -48,6 +48,10 @@ app.use("/site", require("./routes/site_route"));
 //     res.render('pay', {
 //     key: process.env.stripe_Publishable_Key
 //     })
+// app.get('/', function(req, res){
+//     res.render('pay', {
+//     key: process.env.stripe_Publishable_Key
+//     })
 // })
 
 // app.get('/', (req, res, next) => {
